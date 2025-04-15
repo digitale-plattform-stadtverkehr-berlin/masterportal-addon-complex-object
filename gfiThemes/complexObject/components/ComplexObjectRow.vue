@@ -1,12 +1,13 @@
 <script>
-import beautifyKey from "../../../../src/utils/beautifyKey.js";
+import beautifyKey from "../../../../src/shared/js/utils/beautifyKey.js";
 import ComplexObjectSimple from "./ComplexObjectSimple.vue";
-import {translateKeyWithPlausibilityCheck} from "../../../../src/utils/translateKeyWithPlausibilityCheck";
+import {translateKeyWithPlausibilityCheck} from "../../../../src/shared/js/utils/translateKeyWithPlausibilityCheck";
+import { defineAsyncComponent } from 'vue'
 
 
 export default {
     name: "ComplexObjectRow",
-    components: {ComplexObjectTable: () => import("./ComplexObjectTable.vue"), ComplexObjectSimple},
+    components: {ComplexObjectTable: defineAsyncComponent(() => import("./ComplexObjectTable.vue")), ComplexObjectSimple},
     props: {
         propertyKey: {
             type: String,

@@ -1,9 +1,9 @@
 <script>
-import beautifyKey from "../../../../src/utils/beautifyKey.js";
-import {isWebLink} from "../../../../src/utils/urlHelper.js";
-import {isPhoneNumber, getPhoneNumberAsWebLink} from "../../../../src/utils/isPhoneNumber.js";
-import {isEmailAddress} from "../../../../src/utils/isEmailAddress.js";
-import {isHTML} from "../../../../src/utils/isHTML.js";
+import beautifyKey from "../../../../src/shared/js/utils/beautifyKey.js";
+import {isWebLink} from "../../../../src/shared/js/utils/urlHelper.js";
+import {isPhoneNumber, getPhoneNumberAsWebLink} from "../../../../src/shared/js/utils/isPhoneNumber.js";
+import {isEmailAddress} from "../../../../src/shared/js/utils/isEmailAddress.js";
+import {isHTML} from "../../../../src/shared/js/utils/isHTML.js";
 
 export default {
     name: "ComplexObjectSimple",

@@ -1,14 +1,28 @@
 <script>
-import CompareFeatureIcon from "../../../../src/modules/tools/gfi/components/favoriteIcons/components/CompareFeatureIcon.vue";
-import {getPropertiesWithFullKeys} from "../../../../src/modules/tools/gfi/utils/getPropertiesWithFullKeys.js";
-import {mapAttributes} from "../utils/attributeMapper";
+import beautifyKey from "../../../../src/shared/js/utils/beautifyKey.js";
+import {isImage, isWebLink} from "../../../../src/shared/js/utils/urlHelper.js";
+import {translateKeyWithPlausibilityCheck} from "../../../../src/shared/js/utils/translateKeyWithPlausibilityCheck.js";
+import {isPhoneNumber, getPhoneNumberAsWebLink} from "../../../../src/shared/js/utils/isPhoneNumber.js";
+import {isEmailAddress} from "../../../../src/shared/js/utils/isEmailAddress.js";
+import {isHTML} from "../../../../src/shared/js/utils/isHTML.js";
+import {getPropertiesWithFullKeys} from "../js/getPropertiesWithFullKeys.js";
 import ComplexObjectTable from "./ComplexObjectTable.vue";
+import {mapAttributes} from "../utils/attributeMapper";
 
+/**
+ * The default theme for the get feature info.
+ * @module modules/getFeatureInfo/themes/default/components/DefaultTheme
+ * @vue-prop {Object} feature - The required feature.
+ * @vue-data {Object[]} importedComponents - The imported gfi themes.
+ * @vue-data {Boolean} [showFavoriteIcons=true] - Show favorite icons.
+ * @vue-data {Boolean} [beautifyKeysParam=true] - Specifies if the keys should be displayed more nicely, like first letter cap.
+ * @vue-data {Boolean} [showObjectKeysParam=false] - Show objects key params.
+ * @vue-computed {String} mimeType - Returns the mimeType of the gfi feature
+ */
 export default {
     name: "ComplexObject",
     components: {
-        ComplexObjectTable,
-        CompareFeatureIcon
+        ComplexObjectTable
     },
     props: {
         feature: {
@@ -18,21 +32,25 @@ export default {
     },
     data: () => {
         return {
-            imageLinks: ["bildlink", "link_bild", "Bild", "bild"],
             importedComponents: [],
             showFavoriteIcons: true,
-            maxWidth: "600px",
             beautifyKeysParam: true,
             showObjectKeysParam: false
         };
     },
     computed: {
-
+        /**
+         * Returns the mimeType of the gfi feature.
+         * @returns {String} The mimeType.
+         */
+        mimeType: function () {
+            return this.feature.getMimeType();
+        }
     },
     watch: {
         feature () {
             this.$nextTick(() => {
-                this.setMaxWidth(this.feature.getTheme()?.params);
+                this.addTextHtmlContentToIframe();
                 this.initParams(this.feature.getTheme()?.params);
             });
         }
@@ -41,16 +59,24 @@ export default {
         this.showFavoriteIcons = this.feature.getTheme()?.params?.showFavoriteIcons ?
             this.feature.getTheme().params.showFavoriteIcons : this.showFavoriteIcons;
 
-        this.replacesConfiguredImageLinks();
         this.setImportedComponents();
     },
     mounted () {
         this.$nextTick(() => {
-            this.setMaxWidth(this.feature.getTheme()?.params);
+            this.addTextHtmlContentToIframe();
             this.initParams(this.feature.getTheme()?.params);
         });
     },
     methods: {
+        beautifyKey,
+        isWebLink,
+        isImage,
+        isPhoneNumber,
+        getPhoneNumberAsWebLink,
+        isEmailAddress,
+        isHTML,
+        translateKeyWithPlausibilityCheck,
+
         /**
          * checks if given feature has a function getMappedProperties
          * @param {Object} feature the current feature to check
@@ -60,6 +86,21 @@ export default {
             return typeof feature === "object" && feature !== null && typeof feature.getMappedProperties === "function";
         },
 
+        /**
+         * checks if the given feature has one or more mapped properties
+         * @param {Object} feature the current feature to check
+         * @returns {Boolean} returns true if feature has mapped properties
+         */
+        hasMappedProperties (feature) {
+            return Object.keys(feature.getMappedProperties()).length !== 0;
+        },
+        /**
+         * @param {String} value string to check.
+         * @returns {Boolean} whether the given value includes a pipe.
+         */
+        hasPipe: function (value) {
+            return typeof value === "string" && value.includes("|");
+        },
         /**
          * returns the mapped properties of the given feature or parses the properites through getPropertiesWithFullKeys if the component flag showObjectKeysParam is set
          * @param {Object} feature the current feature
@@ -113,26 +154,32 @@ export default {
         },
 
         /**
-         * Replaces  the configured imageLinks from the gfiTheme.params to the imageLinks.
+         * Adds the text/html content to the iframe.
+         * The onLoad event of the iframe starts with the execution of close().
          * @returns {void}
          */
-        replacesConfiguredImageLinks: function () {
-            const imageLinksAttribute = this.feature.getTheme()?.params?.imageLinks;
+        addTextHtmlContentToIframe: function () {
+            const iframe = document.getElementsByClassName("gfi-iFrame")[0];
 
-            if (Array.isArray(imageLinksAttribute)) {
-                this.imageLinks = imageLinksAttribute;
-            }
-            else if (typeof imageLinksAttribute === "string") {
-                this.imageLinks = [imageLinksAttribute];
+            if (this.mimeType === "text/html" && iframe) {
+                this.setIframeSize(iframe, this.feature.getTheme()?.params);
+                iframe.contentWindow.document.open();
+                iframe.contentWindow.document.write(this.feature.getDocument());
+                iframe.contentWindow.document.close();
             }
         },
 
         /**
-         * Sets the max-width of the default gfiTheme content.
+         * Sets the size of the given iframe.
+         * The iframe size can be overwritten in the config.json at the layer.
+         * @param {Object} iframe The iframe.
          * @param {Object} params The gfi parameters.
          * @returns {void}
          */
-        setMaxWidth: function (params) {
+        setIframeSize: function (iframe, params) {
+            document.getElementsByClassName("gfi-theme-iframe")[0].style.maxWidth = "";
+            iframe.style.width = params?.iframe?.width;
+            iframe.style.height = params?.iframe?.height;
         }
     }
 };
@@ -163,12 +210,12 @@ export default {
     height: 450px;
     resize: both;
 }
-@include media-breakpoint-up(sm) {
+@media (min-width: 768px) {
     .gfi-iFrame {
         width: 450px;
     }
 }
-@include media-breakpoint-down(sm) {
+@media (max-width: 767px) {
     .gfi-iFrame {
         width: 100%;
     }
@@ -176,15 +223,12 @@ export default {
 .gfi-theme-iframe {
     line-height: 1px;
 }
-.gfi-theme-images {
-    max-width: 600px;
-    height: 100%;
-}
 .gfi-theme-images-image {
     margin: auto;
     display: block;
     text-align: center;
     color: $black;
+    width: 100%;
 }
 .favorite-icon-container {
     display: flex;

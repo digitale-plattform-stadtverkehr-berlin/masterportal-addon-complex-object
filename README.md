@@ -6,7 +6,7 @@ Masterportal Addon ComplexObject (gfiTheme)
 Das Addon bietet die Möglichkeit im GFI-Fenster verschachtelte Datenstrukturen zu visualisieren, die sich nicht in der einfachen Tabellenstruktur des Default-Theme abbilden lassen.
 Hierfür wurden die GFI-Attribute um die Typen Object und Array erweitert.
 
-Das Plugin ist mit der Masterportal Version 2.42.0 getestet.
+Das Plugin ist mit der Masterportal Version 3.5.1 getestet.
 
 Das Addon im Einsatz kann in der [Digitalen Plattform Stadtverkehr Berlin](https://viz.berlin.de/site/_masterportal/e-infoplattform/) betrachtet werden.
 Die dazu passende [Konfiguration](https://github.com/digitale-plattform-stadtverkehr-berlin/masterportal-dps-config/blob/master/resources/services-internet.json) steht ebenfalls zu Verfügung 
@@ -25,7 +25,7 @@ Die dazu passende [Konfiguration](https://github.com/digitale-plattform-stadtver
       "beschilderungVorhanden": "Beschilderung vorhanden",
       "ladeSaeulen": {
         "type": "array",
-        "name": "Ladesäule",
+        "name": "Ladepunkt",
         "elements": {
           "type": "object",
           "children": {
@@ -46,7 +46,7 @@ Die dazu passende [Konfiguration](https://github.com/digitale-plattform-stadtver
                   "steckertyp": "Steckertyp",
                   "maxLadeleistungKw": {
                     "name": "Max. Ladeleistung",
-                    "suffix": "kw"
+                    "suffix": "kW"
                   }
                 }
               }
